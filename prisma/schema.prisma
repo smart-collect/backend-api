@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,11 +6,24 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+// Module BINS (Gestion des bacs à ordures)
+model Bin {
+  id        String   @id @default(uuid())
+  longitude Float
+  latitude  Float
+  status    String   @default("EMPTY") // EMPTY, HALF, FULL
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  reports   Report[]
+}
 
-// À compléter avec les modèles pour Smart-Collect
-// Exemples:
-// - User (admins, techniciens, superviseurs)
-// - Device (capteurs IoT ESP32)
-// - Collection (historique des collectes)
-// - Alert (alertes de débordement)
-// - Route (itinéraires de collecte)
+// Module REPORTS (Gestion des signalements de citoyens)
+model Report {
+  id          String   @id @default(uuid())
+  description String?
+  imageUrl    String?
+  status      String   @default("PENDING") // PENDING, VALIDATED, RESOLVED
+  binId       String
+  bin         Bin      @relation(fields: [binId], references: [id])
+  createdAt   DateTime @default(now())
+}
