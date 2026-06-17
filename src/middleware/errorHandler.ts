@@ -38,7 +38,7 @@ export function errorHandler(
   err: Error | ApiError,
   req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ): void {
   const apiError = err instanceof ApiError 
     ? err 
@@ -64,7 +64,7 @@ export function errorHandler(
     error: {
       code: apiError.code,
       message: apiError.message,
-      ...(apiError.details && { details: apiError.details }),
+      ...(apiError.details !== undefined ? { details: apiError.details } : {}),
     },
     timestamp: new Date().toISOString(),
     path: req.path,

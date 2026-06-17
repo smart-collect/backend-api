@@ -3,7 +3,7 @@ import { ReportService } from '../services/report.service';
 
 export const ReportController = {
   // Récupérer tous les signalements
-  getAllReports: async (req: Request, res: Response) => {
+  getAllReports: async (_req: Request, res: Response) => {
     try {
       const reports = await ReportService.getAllReports();
       res.status(200).json(reports);

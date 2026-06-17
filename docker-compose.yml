@@ -23,7 +23,7 @@ services:
 
   # Mosquitto MQTT Broker pour IoT
   mosquitto:
-    image: eclipse-mosquitto:2-alpine
+    image: eclipse-mosquitto:2
     container_name: smart-collect-mosquitto
     ports:
       - '1883:1883'

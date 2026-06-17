@@ -3,7 +3,7 @@ import { BinService } from '../services/bin.service';
 
 export const BinController = {
   // Récupérer tous les bacs
-  getAllBins: async (req: Request, res: Response) => {
+  getAllBins: async (_req: Request, res: Response) => {
     try {
       const bins = await BinService.getAllBins();
       res.status(200).json(bins);

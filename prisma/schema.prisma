@@ -8,13 +8,18 @@ datasource db {
 }
 // Module BINS (Gestion des bacs à ordures)
 model Bin {
-  id        String   @id @default(uuid())
-  longitude Float
-  latitude  Float
-  status    String   @default("EMPTY") // EMPTY, HALF, FULL
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  reports   Report[]
+  id                String        @id @default(uuid())
+  longitude         Float
+  latitude          Float
+  status            String        @default("EMPTY") // EMPTY, HALF, FULL, CRITICAL
+  fillLevel         Float         @default(0)
+  lastMeasurementAt DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  reports           Report[]
+  devices           Device[]
+  measurements      Measurement[]
+  tourBins          TourBin[]
 }
 
 // Module REPORTS (Gestion des signalements de citoyens)
@@ -26,4 +31,116 @@ model Report {
   binId       String
   bin         Bin      @relation(fields: [binId], references: [id])
   createdAt   DateTime @default(now())
+}
+
+// Module DEVICES (Dispositifs ESP32 associes aux bacs)
+model Device {
+  id             String        @id @default(uuid())
+  deviceId       String        @unique
+  name           String
+  mqttUsername   String        @unique
+  mqttPassword   String
+  status         String        @default("OFFLINE") // ONLINE, OFFLINE
+  batteryVoltage Float?
+  batteryPercent Int?
+  lastSeenAt     DateTime?
+  binId          String?
+  bin            Bin?          @relation(fields: [binId], references: [id], onDelete: SetNull)
+  measurements   Measurement[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status])
+  @@index([lastSeenAt])
+  @@index([binId])
+}
+
+// Module MEASUREMENTS (Mesures IoT recues via MQTT)
+model Measurement {
+  id                 String   @id @default(uuid())
+  deviceId           String
+  device             Device   @relation(fields: [deviceId], references: [deviceId], onDelete: Cascade)
+  binId              String?
+  bin                Bin?     @relation(fields: [binId], references: [id], onDelete: SetNull)
+  timestamp          DateTime
+  fillLevel          Float
+  fillCentral        Float?
+  fillLateral        Float?
+  temperature        Float?
+  batteryVoltage     Float?
+  batteryPercent     Int?
+  lidOpensSinceLast  Int?
+  alertType          String?
+  rssiWifi           Int?
+  createdAt          DateTime @default(now())
+
+  @@index([deviceId, timestamp])
+  @@index([binId, timestamp])
+}
+
+// Notifications internes pour agents/admins
+model Notification {
+  id        String   @id @default(uuid())
+  type      String
+  severity  String   @default("INFO") // INFO, WARNING, CRITICAL
+  title     String
+  message   String
+  deviceId  String?
+  binId     String?
+  metadata  Json?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([severity])
+  @@index([createdAt])
+  @@index([deviceId])
+  @@index([binId])
+}
+
+// Module TOURS (Tournées de collecte pour agents)
+model Tour {
+  id          String    @id @default(uuid())
+  name        String
+  agentId     String
+  status      String    @default("PLANNED") // PLANNED, IN_PROGRESS, COMPLETED
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  bins        TourBin[]
+
+  @@index([agentId])
+  @@index([status])
+  @@index([agentId, status])
+}
+
+model TourBin {
+  id         String    @id @default(uuid())
+  tourId     String
+  tour       Tour      @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  binId      String
+  bin        Bin       @relation(fields: [binId], references: [id])
+  orderIndex Int
+  status     String    @default("PENDING") // PENDING, VISITED
+  visitedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@unique([tourId, binId])
+  @@unique([tourId, orderIndex])
+  @@index([tourId])
+  @@index([binId])
+}
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      String   @default("citizen")
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@index([status])
 }

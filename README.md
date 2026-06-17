@@ -1,307 +1,229 @@
 # Smart-Collect Backend API
 
-Backend API IoT pour la plateforme **Smart-Collect** de gestion de collecte d'ordures pour **Hysacam à Douala**.
+Backend API IoT pour la plateforme **Smart-Collect** — gestion optimisée de la collecte d'ordures pour **Hysacam** (Douala, Cameroun).
 
-## 🎯 Description
+Le serveur expose une API REST pour les applications web/mobile et consomme les mesures des capteurs **ESP32** via **MQTT** (broker Mosquitto).
 
-Smart-Collect est une solution IoT complète pour la gestion optimisée de la collecte des ordures. Le backend reçoit des données provenant de capteurs IoT (ESP32) via MQTT et expose une API REST pour les applications frontend.
+## Stack technique
 
-## 🛠️ Stack Technologique
+| Composant | Version | Rôle |
+|-----------|---------|------|
+| Node.js | ≥ 20 LTS | Runtime |
+| TypeScript | 5.x | Langage (mode strict) |
+| Express | 4.18+ | Framework HTTP |
+| PostgreSQL | 16 | Base relationnelle |
+| Prisma | 5.x | ORM |
+| Mosquitto | 2.x | Broker MQTT IoT |
+| JWT | — | Authentification stateless |
+| Zod | 3.22+ | Validation des entrées |
+| Vitest | 1.1+ | Tests unitaires / intégration |
+| Swagger UI | 3.0 | Documentation interactive |
 
-| Composant      | Version               | Détails                       |
-| -------------- | --------------------- | ----------------------------- |
-| **Node.js**    | 20 LTS                | Environnement d'exécution     |
-| **TypeScript** | 5                     | Mode strict uniquement        |
-| **Express.js** | 4.18+                 | Framework web                 |
-| **PostgreSQL** | 16                    | Base de données relationnelle |
-| **Prisma**     | 5                     | ORM moderne et type-safe      |
-| **MQTT**       | Eclipse Mosquitto 2.x | Communication IoT             |
-| **JWT**        | -                     | Authentification stateless    |
-| **Zod**        | 3.22+                 | Validation de schémas         |
-| **Vitest**     | 1.1+                  | Framework de test             |
-| **Swagger**    | 3.0                   | Documentation API interactive |
+## Prérequis
 
-## 📋 Prérequis
+- **Node.js** 20 LTS ou supérieur
+- **npm** 9+
+- **Docker** & **Docker Compose** (PostgreSQL, Mosquitto, Redis)
+- **Git**
 
-- **Node.js**: 20 LTS ou supérieur
-- **npm** ou **yarn**: Gestionnaire de paquets
-- **Docker & Docker Compose**: Pour les services (PostgreSQL, Mosquitto, Redis)
-- **Git**: Contrôle de version
-
-## 🚀 Installation & Démarrage
-
-### 1️⃣ Cloner le projet
+## Installation rapide
 
 ```bash
+# 1. Cloner et entrer dans le projet
+git clone <url-du-repo> backend-api
 cd backend-api
-```
 
-### 2️⃣ Installer les dépendances
-
-```bash
+# 2. Installer les dépendances
 npm install
-```
 
-### 3️⃣ Configurer l'environnement
-
-```bash
-# Créer le fichier .env à partir du template
+# 3. Configurer l'environnement
 cp .env.example .env
+# Éditer .env — voir section Variables d'environnement
 
-# Éditer .env avec vos valeurs (voir .env.example pour les détails)
-# Important: Générer JWT_SECRET sécurisé
-```
+# 4. Démarrer l'infrastructure Docker
+docker compose up -d
 
-### 4️⃣ Lancer les services (PostgreSQL, Mosquitto, Redis)
-
-```bash
-# Démarrer les containers Docker
-docker-compose up -d
-
-# Vérifier le statut
-docker-compose ps
-```
-
-### 5️⃣ Initialiser la base de données
-
-```bash
-# Exécuter les migrations Prisma
+# 5. Appliquer les migrations
 npm run db:migrate
 
-# (Optionnel) Remplir la base avec les données de seed
+# 6. (Optionnel) Données de démonstration
 npm run db:seed
-```
 
-### 6️⃣ Démarrer le serveur en développement
-
-```bash
+# 7. Lancer le serveur en développement
 npm run dev
 ```
 
-Le serveur démarre sur `http://localhost:3000`
+Le serveur écoute sur **http://localhost:3000**.
 
-## 📖 Documentation
+> **Capture d'écran attendue :** Terminal affichant `Smart-Collect backend started` avec le port `3000` et l'URL du broker MQTT.
 
-### Health Check
+## Vérification
 
 ```bash
+# Health check
 curl http://localhost:3000/health
+
+# Documentation Swagger (navigateur)
+# http://localhost:3000/api-docs
 ```
 
-### Swagger UI
+Réponse health check :
 
-Accédez à la documentation interactive:
-
+```json
+{
+  "success": true,
+  "data": { "status": "UP", "service": "Smart-Collect Backend" },
+  "timestamp": "2026-06-16T10:00:00.000Z"
+}
 ```
-http://localhost:3000/api-docs
-```
 
-## 📝 Scripts Disponibles
+## Commandes npm
+
+| Commande | Description |
+|----------|-------------|
+| `npm run dev` | Serveur en mode watch (`tsx`) |
+| `npm run build` | Compilation TypeScript → `dist/` |
+| `npm start` | Production (`node dist/index.js`) |
+| `npm test` | Suite de tests Vitest |
+| `npm run test:watch` | Tests en mode watch |
+| `npm run test:coverage` | Rapport de couverture |
+| `npm run type-check` | Vérification TypeScript sans émission |
+| `npm run lint` | ESLint sur `src/` |
+| `npm run format` | Prettier sur `src/**/*.ts` |
+| `npm run db:migrate` | Migrations Prisma (dev) |
+| `npm run db:seed` | Seed de la base |
+| `npm run db:reset` | Reset complet (⚠️ perte de données) |
+| `npm run db:studio` | Prisma Studio → http://localhost:5555 |
+| `npm run iot:simulate` | Simulateur ESP32 (MQTT sans hardware) |
+
+### Simulateur IoT
 
 ```bash
-# Développement
-npm run dev              # Lancer en mode watch avec tsx
-
-# Build & Production
-npm run build            # Compiler TypeScript en dist/
-npm start                # Lancer depuis dist/
-
-# Tests
-npm test                 # Exécuter les tests (Vitest)
-npm run test:watch       # Mode watch pour les tests
-npm run test:coverage    # Rapport de couverture
-
-# Base de données
-npm run db:migrate       # Exécuter les migrations Prisma
-npm run db:seed          # Remplir la base avec les données de seed
-npm run db:reset         # Réinitialiser complètement (⚠️ perte de données)
-npm run db:studio        # UI Prisma Studio (localhost:5555)
-
-# Qualité du code
-npm run lint             # ESLint
-npm run format           # Prettier
-npm run type-check       # Vérification des types TypeScript stricte
-
-# IoT & Simulation
-npm run iot:simulate     # Simuler des devices ESP32 envoyant des données MQTT
+# Envoi rapide (intervalle 3 s au lieu de 30 s)
+npm run iot:simulate -- --speed=10 --devices=3
 ```
 
-## 🏗️ Structure du Projet
+Options : `--interval=30000`, `--devices=3`, `--speed=1`.
+
+## Structure du projet
 
 ```
 backend-api/
 ├── src/
 │   ├── config/
-│   │   └── env.ts              # Validation des variables d'environnement (Zod)
+│   │   ├── env.ts              # Variables d'environnement (Zod)
+│   │   └── swagger.ts          # Spécification OpenAPI
+│   ├── controllers/              # Contrôleurs HTTP
+│   ├── services/                 # Logique métier
+│   ├── schemas/                  # Schémas Zod (validation)
+│   ├── routes/                   # Routes Express
 │   ├── middleware/
-│   │   ├── errorHandler.ts      # Gestion centralisée des erreurs
-│   │   ├── notFound.ts          # Middleware 404
-│   │   └── rateLimit.ts         # Rate limiting et protection brute-force
-│   ├── utils/
-│   │   └── logger.ts            # Logger structuré (fichiers + console)
-│   ├── routes/                  # À implémenter
-│   │   ├── auth.ts              # Routes d'authentification
-│   │   ├── devices.ts           # Routes des devices IoT
-│   │   └── collections.ts       # Routes des collectes
-│   ├── controllers/             # À implémenter
-│   ├── services/                # À implémenter
-│   ├── types/                   # Types TypeScript personnalisés
-│   └── index.ts                 # Point d'entrée Express
+│   │   ├── auth.ts               # JWT + rôles
+│   │   ├── errorHandler.ts
+│   │   ├── notFound.ts
+│   │   └── rateLimit.ts
+│   ├── iot/
+│   │   ├── mqtt.client.ts        # Client MQTT
+│   │   ├── mqtt.handlers.ts      # Traitement des messages
+│   │   ├── mqtt.schemas.ts       # Validation payloads IoT
+│   │   └── anomaly-detector.ts   # Détection offline / batterie
+│   ├── utils/logger.ts
+│   └── index.ts                  # Point d'entrée
 ├── prisma/
-│   ├── schema.prisma            # Schéma de données
-│   └── seed.ts                  # Script de seed
-├── tests/                       # Tests (Vitest)
-├── dist/                        # Build compilé (généré)
-├── .env.example                 # Template de variables d'environnement
-├── .env                         # Variables d'environnement (À NE PAS commiter)
-├── .gitignore                   # Fichiers ignorés par Git
-├── docker-compose.yml           # Services Docker (PostgreSQL, Mosquitto, Redis)
-├── tsconfig.json                # Configuration TypeScript (strict mode)
-├── package.json                 # Dépendances et scripts
-└── README.md                    # Ce fichier
+│   ├── schema.prisma             # Modèles de données
+│   └── seed.ts
+├── scripts/
+│   └── iot-simulator.ts          # Simulateur ESP32
+├── tests/                        # Tests Vitest
+├── docs/                         # Documentation détaillée
+│   ├── API.md
+│   ├── DEPLOYMENT.md
+│   ├── CONTRIBUTING.md
+│   └── SECURITY.md
+├── mosquitto/config/             # Config broker MQTT
+├── docker-compose.yml
+├── .env.example
+└── package.json
 ```
 
-## 🔐 Variables d'Environnement
+## Variables d'environnement
 
-Voir [.env.example](.env.example) pour la liste complète. Essentielles:
+Copier `.env.example` vers `.env`. Variables essentielles :
 
-```env
-NODE_ENV=development
-PORT=3000
-DATABASE_URL=postgresql://user:password@localhost:5432/smart_collect
-JWT_SECRET=une_cle_tres_longue_et_aleatoire_min_32_chars
-MQTT_BROKER_URL=mqtt://localhost:1883
-```
+| Variable | Description | Exemple |
+|----------|-------------|---------|
+| `NODE_ENV` | Environnement | `development` |
+| `PORT` | Port HTTP | `3000` |
+| `DATABASE_URL` | Connexion PostgreSQL | `postgresql://user:pass@localhost:5432/smart_collect` |
+| `JWT_SECRET` | Clé JWT (≥ 32 caractères) | *(générer aléatoirement)* |
+| `JWT_EXPIRES_IN` | Durée du token | `15m` / `24h` |
+| `MQTT_BROKER_URL` | Broker MQTT | `mqtt://localhost:1883` |
+| `MQTT_USERNAME` | Auth MQTT (optionnel) | |
+| `MQTT_PASSWORD` | Auth MQTT (optionnel) | |
+| `MQTT_TOPICS_SUBSCRIBE` | Topics d'abonnement | `devices/+/data,devices/+/status,devices/+/alert` |
+| `SWAGGER_ENABLED` | Activer Swagger UI | `true` |
+| `SWAGGER_URL` | Chemin Swagger | `/api-docs` |
+| `CORS_ORIGIN` | Origines autorisées | `http://localhost:3000` |
+| `RATE_LIMIT_WINDOW_MS` | Fenêtre rate limit | `900000` (15 min) |
+| `RATE_LIMIT_MAX_REQUESTS` | Max requêtes / fenêtre | `100` |
 
-## 🗄️ Base de Données
+Liste complète : [.env.example](.env.example).
 
-### Migrations Prisma
+## Documentation
+
+| Document | Contenu |
+|----------|---------|
+| [docs/API.md](docs/API.md) | Référence API complète, auth, exemples |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Déploiement production, Mosquitto, backup |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | GitFlow, commits, PR, tests |
+| [docs/SECURITY.md](docs/SECURITY.md) | Politique de sécurité |
+
+### Swagger UI
+
+Documentation interactive disponible en développement :
+
+**http://localhost:3000/api-docs**
+
+> **Capture d'écran attendue :** Page Swagger avec les tags *Tours* et *Stats*, bouton « Authorize » pour saisir le Bearer JWT, et la liste des endpoints `GET /stats/dashboard`, `POST /tours/generate`, etc.
+
+## Modules fonctionnels
+
+| Module | Préfixe | Auth | Description |
+|--------|---------|------|-------------|
+| Health | `/health` | Non | Sonde de disponibilité |
+| Bins | `/bins` | Non* | Gestion des bacs à ordures |
+| Reports | `/report` | Non* | Signalements citoyens |
+| Devices | `/devices` | JWT | Dispositifs ESP32 |
+| Tours | `/tours` | JWT (agent+) | Tournées de collecte |
+| Stats | `/stats` | JWT (agent+) | Tableaux de bord |
+
+\* *Ces routes seront sécurisées dans une prochaine itération.*
+
+## IoT / MQTT
+
+Topics écoutés : `devices/{device_id}/data`, `devices/{device_id}/status`, `devices/{device_id}/alert`.
+
+Exemple de publication (simulateur ou `mosquitto_pub`) :
 
 ```bash
-# Créer une nouvelle migration
-npx prisma migrate dev --name add_users_table
-
-# Appliquer les migrations en production
-npx prisma migrate deploy
+mosquitto_pub -h localhost -p 1883 \
+  -t devices/esp32-001/data \
+  -m '{"device_id":"esp32-001","timestamp":"2026-06-16T12:00:00.000Z","fill_level":78,"temperature":32,"battery_percent":85,"rssi_wifi":-62}'
 ```
 
-### Prisma Studio
+## Tests
 
 ```bash
-npm run db:studio
-# Ouvre l'UI à http://localhost:5555
+npm test                 # 34 tests
+npm run test:coverage    # Rapport HTML dans coverage/
 ```
 
-## 🔌 IoT & MQTT
+## Liens utiles
 
-Le backend se connecte automatiquement au broker MQTT configuré et s'abonne aux topics définis dans `MQTT_TOPICS_SUBSCRIBE`.
+- [Prisma Docs](https://www.prisma.io/docs)
+- [Mosquitto Manual](https://mosquitto.org/documentation/)
+- [Conventional Commits](https://www.conventionalcommits.org/)
 
-### Format attendu des messages IoT
+## Licence
 
-```json
-{
-  "deviceId": "esp32-01",
-  "timestamp": "2026-06-02T10:30:00Z",
-  "temperature": 28.5,
-  "humidity": 65,
-  "fillLevel": 87.3,
-  "location": {
-    "latitude": 3.8667,
-    "longitude": 11.5167
-  }
-}
-```
-
-### Tester avec mosquitto_pub
-
-```bash
-mosquitto_pub -h localhost -p 1883 -t devices/esp32-01/data -m '{"deviceId":"esp32-01","temperature":25,"fillLevel":75}'
-```
-
-## 🧪 Tests
-
-```bash
-# Lancer tous les tests
-npm test
-
-# Mode watch (rechargement auto)
-npm run test:watch
-
-# Avec couverture
-npm run test:coverage
-```
-
-## 🚀 Déploiement
-
-### Build pour production
-
-```bash
-npm run build
-```
-
-### Exécution en production
-
-```bash
-NODE_ENV=production npm start
-```
-
-## 📊 Monitoring & Logs
-
-Les logs sont écrits dans:
-
-- **Console**: En temps réel (développement)
-- **Fichiers**: `logs/` avec séparation par niveau et date
-
-```bash
-# Voir les logs récents
-tail -f logs/info-*.log
-tail -f logs/error-*.log
-```
-
-## 🤝 Format de Réponse Standardisé
-
-### Succès
-
-```json
-{
-  "success": true,
-  "data": {},
-  "timestamp": "2026-06-02T10:30:00Z"
-}
-```
-
-### Erreur
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Description de l'erreur",
-    "details": {}
-  },
-  "timestamp": "2026-06-02T10:30:00Z",
-  "path": "/api/endpoint"
-}
-```
-
-## 🔒 Sécurité
-
-- ✅ **Helmet**: Headers de sécurité HTTP
-- ✅ **CORS**: Whitelisting des origines
-- ✅ **Rate Limiting**: Protection contre les attaques
-- ✅ **JWT**: Authentification stateless
-- ✅ **Bcrypt**: Hashage des mots de passe
-- ✅ **Zod**: Validation stricte des entrées
-- ✅ **TypeScript Strict**: Prévention des erreurs de type
-
-## 📧 Support
-
-Pour toute question ou problème:
-
-- Créer une issue sur le repository
-- Contacter l'équipe Smart-Collect
-
-## 📄 Licence
-
-Smart-Collect Backend © 2026 - Tous droits réservés
+Smart-Collect Backend © 2026 — Tous droits réservés.
