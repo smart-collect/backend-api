@@ -21,7 +21,12 @@ import statsRoutes from './routes/stats.routes';
 const app: Express = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3001', 'http://localhost:3000', 'http://localhost:8000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 app.use(helmet());
 app.use(globalLimiter);
 
