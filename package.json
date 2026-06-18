@@ -40,12 +40,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^8.55.0",
-    
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/multer": "^1.4.11",
-    "@types/node": "^20.10.6",
+    "@types/node": "^20.19.43",
     "@types/supertest": "^2.0.16",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.6",
@@ -56,8 +56,12 @@
     "prettier": "^3.1.1",
     "prisma": "^5.7.0",
     "supertest": "^6.3.3",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
+    "typescript": "^5.9.3",
     "vitest": "^1.1.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
