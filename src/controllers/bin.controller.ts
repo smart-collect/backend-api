@@ -25,5 +25,33 @@ export const BinController = {
     } catch (error) {
       res.status(500).json({ error: 'Erreur lors de la création du bac' });
     }
+  },
+
+  // Mettre à jour le statut d'un bac (pour ESP32)
+  updateBinStatus: async (req: Request, res: Response) => {
+    try {
+      const { deviceId, fill, d1, d2, alert } = req.body;
+      
+      if (!deviceId) {
+        res.status(400).json({ error: 'deviceId est requis' });
+        return;
+      }
+
+      const updatedBin = await BinService.updateBinStatus(deviceId, {
+        fillLevel: fill,
+        distance1: d1,
+        distance2: d2,
+        isAlert: alert,
+      });
+
+      if (!updatedBin) {
+        res.status(404).json({ error: 'Bac non trouvé' });
+        return;
+      }
+
+      res.status(200).json({ success: true, bin: updatedBin });
+    } catch (error) {
+      res.status(500).json({ error: 'Erreur lors de la mise à jour du statut' });
+    }
   }
 };

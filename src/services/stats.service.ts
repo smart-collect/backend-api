@@ -149,6 +149,37 @@ export const StatsService = {
     return data;
   },
 
+  getAlerts: async () => {
+    const criticalBins = await prisma.bin.findMany({
+      where: { status: 'CRITICAL' },
+      include: { devices: true },
+      take: 10,
+    });
+
+    return criticalBins.map((bin) => ({
+      id: bin.id,
+      type: 'FULL',
+      message: `Bac critique à ${Math.round(bin.fillLevel)}%`,
+      meta: `Lat: ${bin.latitude.toFixed(4)}, Lon: ${bin.longitude.toFixed(4)}`,
+      severity: 'CRITICAL',
+      href: `/dashboard/bins/${bin.id}`,
+    }));
+  },
+
+  getNeighborhoodStats: async () => {
+    const [totalBins, halfFullBins, criticalBins] = await Promise.all([
+      prisma.bin.count(),
+      prisma.bin.count({ where: { status: 'HALF' } }),
+      prisma.bin.count({ where: { status: 'CRITICAL' } }),
+    ]);
+
+    return {
+      totalBins,
+      almostFull: halfFullBins,
+      activeAlerts: criticalBins,
+    };
+  },
+
   getBinHistory: async (binId: string, days: number): Promise<BinHistoryPoint[]> => {
     const bin = await prisma.bin.findUnique({
       where: { id: binId },

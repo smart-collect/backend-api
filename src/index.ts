@@ -57,12 +57,17 @@ app.use(errorHandler);
 
 if (env.NODE_ENV !== 'test') {
   const anomalyDetector = startAnomalyDetector();
-  connectMqttClient();
+  
+  if (env.MQTT_ENABLED) {
+    connectMqttClient();
+  }
 
   const shutdown = () => {
     logger.info('Stopping Smart-Collect backend');
     clearInterval(anomalyDetector);
-    stopMqttClient();
+    if (env.MQTT_ENABLED) {
+      stopMqttClient();
+    }
     process.exit(0);
   };
 
@@ -72,7 +77,8 @@ if (env.NODE_ENV !== 'test') {
   app.listen(env.PORT, () => {
     logger.info('Smart-Collect backend started', {
       port: env.PORT,
-      mqtt_broker: env.MQTT_BROKER_URL,
+      mqtt_enabled: env.MQTT_ENABLED,
+      mqtt_broker: env.MQTT_ENABLED ? env.MQTT_BROKER_URL : 'disabled',
     });
   });
 }

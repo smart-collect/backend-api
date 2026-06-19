@@ -1,12 +1,8 @@
 import { Router } from 'express';
 
 import { StatsController } from '@controllers/stats.controller';
-import { requireAuth, requireRole } from '@middleware/auth';
 
 const router = Router();
-
-router.use(requireAuth);
-router.use(requireRole('agent', 'admin'));
 
 /**
  * @swagger
@@ -29,6 +25,33 @@ router.use(requireRole('agent', 'admin'));
  *         description: Statistiques dashboard
  */
 router.get('/dashboard', StatsController.getDashboard);
+
+/**
+ * @swagger
+ * /stats/neighborhood:
+ *   get:
+ *     summary: Statistiques du quartier pour citoyens
+ *     description: Nombre de bacs surveillés, presque pleins, et alertes actives.
+ *     tags: [Stats]
+ *     responses:
+ *       200:
+ *         description: Statistiques du quartier
+ */
+router.get('/neighborhood', StatsController.getNeighborhoodStats);
+
+/**
+ * @swagger
+ * /stats/alerts:
+ *   get:
+ *     summary: Alertes urgentes (bacs critiques, incendies, etc.)
+ *     tags: [Stats]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Liste des alertes
+ */
+router.get('/alerts', StatsController.getAlerts);
 
 /**
  * @swagger

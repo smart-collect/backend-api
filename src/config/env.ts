@@ -18,6 +18,7 @@ const envSchema = z.object({
   JWT_EXPIRES_IN: z.string().default('15m'),
 
   MQTT_BROKER_URL: z.string().url('URL MQTT invalide').default('mqtt://localhost:1883'),
+  MQTT_ENABLED: z.enum(['true', 'false']).transform((val) => val === 'true').default('false'),
   MQTT_USERNAME: z.string().optional(),
   MQTT_PASSWORD: z.string().optional(),
   MQTT_TOPICS_SUBSCRIBE: z.string().default('devices/+/data,devices/+/status,devices/+/alert'),

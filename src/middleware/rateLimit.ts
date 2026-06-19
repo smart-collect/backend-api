@@ -40,11 +40,11 @@ export const globalLimiter = rateLimit({
 
 /**
  * Rate limiting strict pour l'authentification
- * Prévient les attaques par force brute
+ * Prévint les attaques par force brute
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5,                     // 5 tentatives
+  max: 100,                   // 100 tentatives (augmenté pour le développement)
   message: {
     success: false,
     error: {

@@ -142,3 +142,41 @@ export async function refreshToken(token: string) {
     throw new Error('INVALID_TOKEN');
   }
 }
+
+export async function getCurrentUser(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new Error('USER_NOT_FOUND');
+  }
+
+  return formatResponseUser(user);
+}
+
+export async function getUserStats(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new Error('USER_NOT_FOUND');
+  }
+
+  // Get tour count (if user is an agent)
+  let tourCount = 0;
+  if (user.role === 'agent') {
+    tourCount = await prisma.tour.count({
+      where: { agentId: userId },
+    });
+  }
+
+  // Note: Report model doesn't have userId field in current schema
+  // This would need to be added to properly track user reports
+  return {
+    reports: 0,
+    tours: tourCount,
+    joinDate: user.createdAt,
+  };
+}

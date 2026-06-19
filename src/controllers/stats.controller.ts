@@ -70,6 +70,24 @@ export const StatsController = {
     }
   },
 
+  getNeighborhoodStats: async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const stats = await StatsService.getNeighborhoodStats();
+      success(res, 200, stats);
+    } catch (error) {
+      handleControllerError(res, _req, error);
+    }
+  },
+
+  getAlerts: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      const alerts = await StatsService.getAlerts();
+      success(res, 200, alerts);
+    } catch (error) {
+      handleControllerError(res, req, error);
+    }
+  },
+
   getBinHistory: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const query = binHistoryQuerySchema.parse(req.query);

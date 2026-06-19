@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { ZodError } from 'zod';
 
-import { authenticateUser, refreshToken, registerUser } from '@services/auth.service';
+import { authenticateUser, refreshToken, registerUser, getCurrentUser, getUserStats } from '@services/auth.service';
 import { loginSchema, registerSchema } from '@/schemas/auth.schemas';
+import { AuthenticatedRequest } from '@middleware/auth';
 
 function success(res: Response, status: number, data: unknown): void {
   res.status(status).json({
@@ -48,6 +49,11 @@ function handleControllerError(res: Response, error: unknown, path: string): voi
         status: 401,
         code: 'UNAUTHORIZED',
         message: 'Header Authorization: Bearer <token> requis',
+      },
+      USER_NOT_FOUND: {
+        status: 404,
+        code: 'USER_NOT_FOUND',
+        message: 'Utilisateur non trouvé',
       },
     };
 
@@ -108,6 +114,30 @@ export const AuthController = {
       const token = authorization.slice('Bearer '.length);
       const refreshedToken = await refreshToken(token);
       success(res, 200, { token: refreshedToken });
+    } catch (error) {
+      handleControllerError(res, error, req.path);
+    }
+  },
+
+  getMe: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user) {
+        throw new Error('AUTHORIZATION_HEADER_REQUIRED');
+      }
+      const user = await getCurrentUser(req.user.id);
+      success(res, 200, user);
+    } catch (error) {
+      handleControllerError(res, error, req.path);
+    }
+  },
+
+  getStats: async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+    try {
+      if (!req.user) {
+        throw new Error('AUTHORIZATION_HEADER_REQUIRED');
+      }
+      const stats = await getUserStats(req.user.id);
+      success(res, 200, stats);
     } catch (error) {
       handleControllerError(res, error, req.path);
     }
